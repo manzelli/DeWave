@@ -58,7 +58,9 @@ def train(model_dir, sum_dir, train_pkl, val_pkl):
         train_op = BiModel.train(loss, lr)
         saver = tf.train.Saver(tf.global_variables())
         summary_op = tf.summary.merge_all()
-        sess = tf.Session()
+
+        # Enable GPU usage.
+        sess = tf.Session(config=tf.ConfigProto(log_device_placement=True))
 
         # either train from scratch or a trained model
         seeds = [f for f in os.listdir(model_dir) if re.match(r'model\.ckpt.*', f)]
@@ -123,6 +125,7 @@ def train(model_dir, sum_dir, train_pkl, val_pkl):
                                      examples_per_sec, sec_per_batch,
                                      data_generator.epoch))
             if step % 500 == 0:
+                # Saves checkpoint every 500 steps
                 checkpoint_path = os.path.join(model_dir, 'model.ckpt')
                 saver.save(sess, checkpoint_path)
 
@@ -166,7 +169,10 @@ def train(model_dir, sum_dir, train_pkl, val_pkl):
 
         np.save(train_loss_file, train_loss)
         np.save(val_loss_file, val_loss)
+
 if __name__ == "__main__":
+
+    # Parse command line args
     parser = argparse.ArgumentParser("The function is to train the model")
     parser.add_argument("-m", "--model_dir", type=str, help="the directory \
                 where the trained model is stored")
@@ -178,5 +184,8 @@ if __name__ == "__main__":
                 help="file name of the validation data")
     args = parser.parse_args()
 
+    # Print start time of training
     print('%s start' % datetime.now())
+
+    # Train model with parsed args
     train(args.model_dir, args.summary_dir, args.train_pkl, args.val_pkl)
