@@ -6,16 +6,17 @@ from __future__ import division
 from __future__ import print_function
 
 from datetime import datetime
+import argparse
 import os.path
 import time
 import re
 
 import numpy as np
 import tensorflow as tf
-from .datagenerator import DataGenerator
-from .model import Model
+from DeWave.datagenerator import DataGenerator
+from DeWave.model import Model
 
-from .constant import *
+from DeWave.constant import *
 
 ## model_dir is the directory in which stores the trained model
 ## sum_dir is the directory in which stores the summary of training process
@@ -166,5 +167,16 @@ def train(model_dir, sum_dir, train_pkl, val_pkl):
         np.save(train_loss_file, train_loss)
         np.save(val_loss_file, val_loss)
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser("The function is to train the model")
+    parser.add_argument("-m", "--model_dir", type=str, help="the directory \
+                where the trained model is stored")
+    parser.add_argument("-s", "--summary_dir", type=str, help="the directory \
+                where the summary is stored")
+    parser.add_argument("--train_pkl", type=str, nargs='+', \
+                help="file name of the training data")
+    parser.add_argument("--val_pkl", type=str, nargs='+', \
+                help="file name of the validation data")
+    args = parser.parse_args()
+
     print('%s start' % datetime.now())
-    train()
+    train(args.model_dir, args.summary_dir, args.train_pkl, args.val_pkl)
